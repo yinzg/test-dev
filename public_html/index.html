@@ -26,6 +26,8 @@ and open the template in the editor.
 
             </tbody>
         </table>
+
+        <div id="tatol"></div>
         <ul id="ul" class="pagination">
         </ul>
 
@@ -47,7 +49,6 @@ and open the template in the editor.
             var pagination = function (pageTag, url, showCount, activeNum, param) {
                 var dataCount = 82;//数据总记录数
                 var pageCount = 0;//分页总数
-                var datas = "";//查询的数据
                 var ul = $(pageTag);//页码标签元素
                 var isInitWindow = true;//浏览器窗口是否初始化或刷新
                 var pageTagChanged = false;
@@ -67,7 +68,8 @@ and open the template in the editor.
                         data: param,
                         success: function (data, status, xhr) {
                             if (status === "success") {
-                                var postData = JSON.parse(data);
+//                                var postData = JSON.parse(data);//del
+                                var postData = data;
                                 dataCount = postData.total;
                                 if (dataCount !== 0) {
                                     var getDNSAttackData = function (data) {
@@ -87,6 +89,8 @@ and open the template in the editor.
                                         $("#dns_attack_address").append(view_dns);
                                         $("#attack_dns_time").html(tim);
                                     }(postData);
+                                    console.log("page=" + param.p)
+                                    console.log("pagesize=" + param.pagesize)
                                     return data;
                                 }
                             }
@@ -95,8 +99,7 @@ and open the template in the editor.
                 };
 
                 getData(showCount, activeNum);
-                console.log("page=" + param.p)
-                console.log("pagesize=" + param.pagesize)
+
 
                 if (dataCount === 0) {
                     ul.css("display", "none");
@@ -107,6 +110,7 @@ and open the template in the editor.
                      * 初始化页码标签
                      */
                     var initPageTag = function () {
+                        $("#tatol").text("总页码=" + pageCount);//del
                         ul.html("");
                         ul.append('<li><a title="首页">&lt;&lt;</a></li>');
                         ul.append('<li><a title="上一页">&lt;</a></li>');
@@ -196,8 +200,7 @@ and open the template in the editor.
                                     showStartNum = 1;
                                     showEndNum = pageCount < 5 ? pageCount : 5;
                                     changePageNumTag(true, false);
-//
-                                    //                                    getData(showCount, activeNum);
+                                    getData(showCount, activeNum);
                                 }
                                 break;
                             case "<":
@@ -213,7 +216,7 @@ and open the template in the editor.
                                         changePageNumTag(false);
                                     }
                                 }
-                                //                                getData(showCount, activeNum);
+                                getData(showCount, activeNum);
                                 break;
                             case ">":
                                 activeNum = activedNum >= pageCount ? pageCount : activedNum + 1;
@@ -225,7 +228,7 @@ and open the template in the editor.
                                     } else {
                                         changePageNumTag(true);
                                     }
-                                    //                                    getData(showCount, activeNum);
+                                    getData(showCount, activeNum);
                                 } else {
                                     if (activeNum <= pageCount) {
                                         if (pageCount < 5) {
@@ -237,10 +240,9 @@ and open the template in the editor.
                                             pageTagChanged = true;
                                         }
                                         changePageNumTag(true);
-                                        //                                        getData(showCount, activeNum);
+                                        getData(showCount, activeNum);
                                     }
                                 }
-                                console.log(showEndNum);
                                 break;
                             case ">>":
                                 activeNum = pageCount;
@@ -255,14 +257,14 @@ and open the template in the editor.
                                     }
 //                                    showEndNum = pageCount;
                                     changePageNumTag(true, true);
-                                    //                                    getData(showCount, activeNum);
+                                    getData(showCount, activeNum);
                                 }
                                 break;
                             default:
                                 activeNum = clicked;
                                 actived.removeClass("active");
                                 ul.find("[title=" + clicked + "]").parent("li").addClass("active");
-                                //                                getData(showCount, activeNum);
+                                getData(showCount, activeNum);
                                 break;
                         }
 

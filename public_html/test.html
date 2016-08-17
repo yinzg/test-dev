@@ -25,6 +25,8 @@ and open the template in the editor.
 
             </tbody>
         </table>
+
+        <div id="tatol"></div>
         <ul id="ul" class="pagination">
         </ul>
 
@@ -80,7 +82,7 @@ and open the template in the editor.
                     });
                 };
 
-                //getData(showCount, activeNum);
+                getData(showCount, activeNum);
 
                 if (dataCount === 0) {
                     ul.css("display", "none");
@@ -91,6 +93,7 @@ and open the template in the editor.
                      * 初始化页码标签
                      */
                     var initPageTag = function () {
+                        $("#tatol").text(pageCount);
                         ul.html("");
                         ul.append('<li><a title="首页">&lt;&lt;</a></li>');
                         ul.append('<li><a title="上一页">&lt;</a></li>');
@@ -125,9 +128,19 @@ and open the template in the editor.
                          * @param {type} isLast:是否点击最后一页
                          */
                         var changePageNumTag = function (showStartNum, isNext, isLast) {
-                            for (var i = 0; i < pageCount; i++) {
-                                $("#p_tag_" + (i + 1)).text(showStartNum + i);
-                                $("#p_tag_" + (i + 1)).attr("title", showStartNum + i);
+//                            for (var i = 0; i < pageCount; i++) {
+//                                $("#p_tag_" + (i + 1)).text(showStartNum + i);
+//                                $("#p_tag_" + (i + 1)).attr("title", showStartNum + i);
+//                            }
+                            var n = showEndNum - showStartNum;
+                            var num = pageCount < 5 ? pageCount : n + 1;
+                            for (var i = 0; i < 5; i++) {
+                                if (i < num) {
+                                    $("#p_tag_" + (i + 1)).text(showStartNum + i);
+                                    $("#p_tag_" + (i + 1)).attr("title", showStartNum + i);
+                                } else {
+                                    $("#p_tag_" + (i + 1)).parent("li").css("display", "none");
+                                }
                             }
                             actived.removeClass("active");
                             if (typeof isLast === "boolean") {
@@ -160,6 +173,7 @@ and open the template in the editor.
                                 if (activedNum !== showStartNum) {
                                     actived.removeClass("active");
                                     ul.find("[title=" + activeNum + "]").parent("li").addClass("active");
+                                    changePageNumTag(showStartNum, false);
                                 } else {
                                     if (activeNum >= 1) {
                                         showStartNum = activedNum - 5;
@@ -172,24 +186,26 @@ and open the template in the editor.
                             case ">":
                                 activeNum = activedNum + 1;
                                 showEndNum = pageCount < 5 ? pageCount : 5;
-                                if (activedNum !== showEndNum) {
-                                    actived.removeClass("active");
-                                    ul.find("[title=" + activeNum + "]").parent("li").addClass("active");
-                                    getData(showCount, activeNum);
-                                } else {
-                                    if (activeNum <= pageCount) {
-                                        if (pageCount < 5) {
-                                            showStartNum = parseInt($("#p_tag_1").text());
-                                            showEndNum = pageCount;
-                                        } else {
-                                            showStartNum = activeNum;
-                                            showEndNum = activeNum + 4;
-                                        }
-                                        changePageNumTag(showStartNum, true);
+                                if (activedNum !== pageCount) {
+                                    if (activedNum !== showEndNum) {
+                                        actived.removeClass("active");
+                                        ul.find("[title=" + activeNum + "]").parent("li").addClass("active");
+//                                        changePageNumTag(showStartNum, true);
                                         getData(showCount, activeNum);
+                                    } else {
+                                        if (activeNum <= pageCount) {
+                                            if (pageCount < 5) {
+                                                showStartNum = parseInt($("#p_tag_1").text());
+                                                showEndNum = pageCount;
+                                            } else {
+                                                showStartNum = activeNum;
+                                                showEndNum = activeNum + 4;
+                                            }
+                                            changePageNumTag(showStartNum, true);
+                                            getData(showCount, activeNum);
+                                        }
                                     }
                                 }
-
                                 break;
                             case ">>":
                                 activeNum = pageCount;
