@@ -12,10 +12,24 @@ and open the template in the editor.
         <link href="bootstrap-3.3.2/css/bootstrap.min.css" rel="stylesheet"/>
     </head>
     <body>
+        <table class="table-bordered" id="dns_jiechi">
+            <thead>
+                <tr>
+                    <td>被劫持区域</td>
+                    <td>被劫持ISP</td>
+                    <td>劫持到</td>
+                    <td>起止时间</td>
+                </tr>
+            </thead>
+            <tbody id="dns_attack_address">
 
+            </tbody>
+        </table>
         <ul id="ul" class="pagination">
         </ul>
+
         <script src="jquery.3.1.0.min.js"></script>
+        <script src="mustache.js"></script>
         <script>
             var pagination = function (pageTag, url, showCount, activeNum, param) {
                 var dataCount = 41;//数据总记录数
@@ -33,12 +47,13 @@ and open the template in the editor.
                     param.pagesize = showCount;
                     $.ajax({
                         async: false,
-                        type: 'post',
-                        url: url,
+                        type: 'get',
+                        url: 'test.json',
                         data: param,
                         success: function (data, status, xhr) {
                             if (status === "success") {
-                                var postData = JSON.parse(data);
+//                                var postData = JSON.parse(data);
+                                var postData = data;
                                 dataCount = postData.total;
                                 if (dataCount !== 0) {
                                     var getDNSAttackData = function (data) {
@@ -60,7 +75,6 @@ and open the template in the editor.
                                     }(postData);
                                     return data;
                                 }
-
                             }
                         }
                     });
@@ -138,7 +152,7 @@ and open the template in the editor.
                                     showStartNum = 1;
                                     showEndNum = activeNum + 4;
                                     changePageNumTag(showStartNum, true, false);
-                                    // getData(showCount, activeNum);
+                                    getData(showCount, activeNum);
                                 }
                                 break;
                             case "<":
@@ -153,7 +167,7 @@ and open the template in the editor.
                                         changePageNumTag(showStartNum, false);
                                     }
                                 }
-                                //getData(showCount, activeNum);
+                                getData(showCount, activeNum);
                                 break;
                             case ">":
                                 activeNum = activedNum + 1;
@@ -161,7 +175,7 @@ and open the template in the editor.
                                 if (activedNum !== showEndNum) {
                                     actived.removeClass("active");
                                     ul.find("[title=" + activeNum + "]").parent("li").addClass("active");
-                                    //  getData(showCount, activeNum);
+                                    getData(showCount, activeNum);
                                 } else {
                                     if (activeNum <= pageCount) {
                                         if (pageCount < 5) {
@@ -172,7 +186,7 @@ and open the template in the editor.
                                             showEndNum = activeNum + 4;
                                         }
                                         changePageNumTag(showStartNum, true);
-                                        // getData(showCount, activeNum);
+                                        getData(showCount, activeNum);
                                     }
                                 }
 
@@ -187,7 +201,7 @@ and open the template in the editor.
                                     }
                                     showEndNum = pageCount;
                                     changePageNumTag(showStartNum, true, true);
-                                    //getData(showCount, activeNum);
+                                    getData(showCount, activeNum);
                                 }
                                 break;
                             default:
@@ -195,7 +209,7 @@ and open the template in the editor.
                                 actived.removeClass("active");
                                 ul.find("[title=" + clicked + "]").parent("li").addClass("active");
 
-                                // getData(showCount, activeNum);
+                                getData(showCount, activeNum);
                                 break;
                         }
                     });

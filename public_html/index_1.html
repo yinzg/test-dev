@@ -13,25 +13,10 @@ and open the template in the editor.
     </head>
     <body>
 
-        <table class="table-bordered" id="dns_jiechi">
-            <thead>
-                <tr>
-                    <td>被劫持区域</td>
-                    <td>被劫持ISP</td>
-                    <td>劫持到</td>
-                    <td>起止时间</td>
-                </tr>
-            </thead>
-            <tbody id="dns_attack_address">
-
-            </tbody>
-        </table>
         <ul id="ul" class="pagination">
         </ul>
-
-
         <script src="jquery.3.1.0.min.js"></script>
-        <script src="mustache.js"></script>
+
         <script>
 
 
@@ -45,14 +30,12 @@ and open the template in the editor.
              * @param {Array} param:请求数据时附带的参数
              */
             var pagination = function (pageTag, url, showCount, activeNum, param) {
-                var dataCount = 82;//数据总记录数
+                var dataCount = 42;//数据总记录数
                 var pageCount = 0;//分页总数
                 var datas = "";//查询的数据
                 var ul = $(pageTag);//页码标签元素
                 var isInitWindow = true;//浏览器窗口是否初始化或刷新
                 var pageTagChanged = false;
-                var showStartNum = 1;//第一个页码标签显示的数值
-                var showEndNum = 5;//最后一个页码标签显示的数值
 
                 /**
                  * 请求数据
@@ -62,43 +45,39 @@ and open the template in the editor.
                     param.pagesize = showCount;
                     $.ajax({
                         async: false,
-                        type: 'get',
-                        url: 'test.json',
+                        type: 'post',
+                        url: url,
                         data: param,
                         success: function (data, status, xhr) {
                             if (status === "success") {
                                 var postData = JSON.parse(data);
+                                var getDNSAttackData = function (data) {
+                                    $("#dns_attack_address").empty();
+                                    var tim = data.check_time;
+                                    var dns_attack = data.now_status;
+                                    if (dns_attack == 0) {
+                                        $("#attack_dns").html("暂停");
+                                    } else if (dns_attack == 1) {
+                                        $("#attack_dns").html("<span style='color: #2be38a;'>正常</span>");
+                                    } else if (dns_attack == 2) {
+                                        $("#attack_dns").html("<span style='color:red'>被劫持</span>");
+                                    }
+                                    var dns_attack_address = data;
+                                    var dns_attack = '{{#data}}<tr><td>{{area}}</td><td>{{supplier}}</td><td>{{dns_record}}</td><td>{{time_length}}</td></tr>{{/data}}';
+                                    var view_dns = Mustache.render(dns_attack, dns_attack_address);
+                                    $("#dns_attack_address").append(view_dns);
+                                    $("#attack_dns_time").html(tim);
+                                }(postData);
                                 dataCount = postData.total;
-                                if (dataCount !== 0) {
-                                    var getDNSAttackData = function (data) {
-                                        $("#dns_attack_address").empty();
-                                        var tim = data.check_time;
-                                        var dns_attack = data.now_status;
-                                        if (dns_attack == 0) {
-                                            $("#attack_dns").html("暂停");
-                                        } else if (dns_attack == 1) {
-                                            $("#attack_dns").html("<span style='color: #2be38a;'>正常</span>");
-                                        } else if (dns_attack == 2) {
-                                            $("#attack_dns").html("<span style='color:red'>被劫持</span>");
-                                        }
-                                        var dns_attack_address = data;
-                                        var dns_attack = '{{#data}}<tr><td>{{area}}</td><td>{{supplier}}</td><td>{{dns_record}}</td><td>{{time_length}}</td></tr>{{/data}}';
-                                        var view_dns = Mustache.render(dns_attack, dns_attack_address);
-                                        $("#dns_attack_address").append(view_dns);
-                                        $("#attack_dns_time").html(tim);
-                                    }(postData);
-                                    return data;
-                                }
+                                return  dataCount === 0 ? datas = "null" : datas = data;
                             }
                         }
                     });
                 };
 
-                getData(showCount, activeNum);
-                console.log("page=" + param.p)
-                console.log("pagesize=" + param.pagesize)
+                //                datas = getData(showCount, activeNum);
 
-                if (dataCount === 0) {
+                if (datas === "null") {
                     ul.css("display", "none");
                 } else {
                     var num = parseInt(dataCount / showCount);
@@ -134,7 +113,8 @@ and open the template in the editor.
                         var activedNum = parseInt(actived.text());
                         var activeNum = 0;
                         var hiddenPageTag = ul.find("[style='display: none;']");
-
+                        var showStartNum = 1;//第一个页码标签显示的数值
+                        var showEndNum = 5;//最后一个页码标签显示的数值
 
                         if (pageTagChanged) {
                             showEndNum = pageCount <= 5 ? pageCount : 5;
@@ -148,23 +128,23 @@ and open the template in the editor.
                          */
                         var changePageNumTag = function (isNext, isLast) {
                             if (pageTagChanged) {
-//                                if (showEndNum !== pageCount) {
-                                var n = showEndNum - showStartNum;
-                                var num = pageCount < 5 ? pageCount : n + 1;
-                                for (var i = 0; i < 5; i++) {
-                                    if (i < num) {
+                                if (showEndNum !== pageCount) {
+                                    var n = showEndNum - showStartNum;
+                                    var num = pageCount < 5 ? pageCount : n + 1;
+                                    for (var i = 0; i < 5; i++) {
+                                        if (i < num) {
+                                            $("#p_tag_" + (i + 1)).text(showStartNum + i);
+                                            $("#p_tag_" + (i + 1)).attr("title", showStartNum + i);
+                                        } else {
+                                            $("#p_tag_" + (i + 1)).parent("li").css("display", "none");
+                                        }
+                                    }
+                                } else {
+                                    for (var i = 0; i < 5; i++) {
                                         $("#p_tag_" + (i + 1)).text(showStartNum + i);
                                         $("#p_tag_" + (i + 1)).attr("title", showStartNum + i);
-                                    } else {
-                                        $("#p_tag_" + (i + 1)).parent("li").css("display", "none");
                                     }
                                 }
-//                                } else {
-//                                    for (var i = 0; i < 5; i++) {
-//                                        $("#p_tag_" + (i + 1)).text(showStartNum + i);
-//                                        $("#p_tag_" + (i + 1)).attr("title", showStartNum + i);
-//                                    }
-//                                }
 
 //                                showEndNum = pageCount;
                             }
@@ -221,7 +201,7 @@ and open the template in the editor.
                                     if (activedNum > showEndNum) {
                                         showStartNum = activeNum;
                                         showEndNum = pageCount;
-                                        pageTagChanged = true;
+                                        pageTagChanged = !pageTagChanged;
                                     } else {
                                         changePageNumTag(true);
                                     }
@@ -233,8 +213,8 @@ and open the template in the editor.
                                             showEndNum = pageCount;
                                         } else {
                                             showStartNum = activeNum;
-                                            showEndNum = showStartNum + 4 < pageCount ? showStartNum + 4 : pageCount;
-                                            pageTagChanged = true;
+                                            showEndNum = pageCount;
+                                            pageTagChanged = !pageTagChanged;
                                         }
                                         changePageNumTag(true);
                                         //                                        getData(showCount, activeNum);
@@ -247,13 +227,11 @@ and open the template in the editor.
                                 if (activedNum !== pageCount) {
                                     if (pageCount < 5) {
                                         showStartNum = parseInt($("#p_tag_1").text());
-                                        showEndNum = pageCount;
                                     } else {
-                                        pageTagChanged = true;
+                                        pageTagChanged = !pageTagChanged;
                                         showStartNum = pageCount - 4;
-                                        showEndNum = pageCount;
                                     }
-//                                    showEndNum = pageCount;
+                                    showEndNum = pageCount;
                                     changePageNumTag(true, true);
                                     //                                    getData(showCount, activeNum);
                                 }
